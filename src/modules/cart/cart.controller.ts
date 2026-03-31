@@ -1,0 +1,24 @@
+import { Request, Response } from 'express';
+import httpStatus from 'http-status';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import { CartService } from './cart.service';
+
+const addToCart = catchAsync(async (req: Request, res: Response) => {
+  // Assume user ID comes from your Auth Middleware (JWT)
+  const userId = req.user._id; 
+  const { bookId, quantity } = req.body;
+
+  const result = await CartService.addToCartIntoDB(userId, bookId, quantity || 1);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Item added to cart successfully',
+    data: result,
+  });
+});
+
+export const CartController = {
+  addToCart,
+};

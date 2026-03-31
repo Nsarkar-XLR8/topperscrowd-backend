@@ -2,6 +2,7 @@ import bookCategoryRouter from "../modules/bookCategory/bookCategory.router";
 import { Router } from "express";
 import userRouter from "../modules/user/user.router";
 import authRouter from "../modules/auth/auth.router";
+import { CartRouter } from "../modules/cart/cart.routes";
 
 const router = Router();
 
@@ -18,6 +19,10 @@ const moduleRoutes = [
     path: "/bookcategory",
     route: bookCategoryRouter,
   },
+  {
+    path: "/cart",
+    route: CartRouter,
+  }
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
