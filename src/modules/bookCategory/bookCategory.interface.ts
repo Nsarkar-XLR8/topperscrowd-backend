@@ -11,4 +11,16 @@ export interface IBookCategory {
   isDeleted?: boolean;
 }
 
+//update interface for update operations
+export interface IBookCategoryUpdate {
+  title?: string;
+  description?: string;
+  image?: {
+    public_id: string;
+    secure_url: string;
+  };
+  isActive?: boolean;
+  isDeleted?: boolean;
+}
+
 export type BookCategoryModel = Model<IBookCategory>;
