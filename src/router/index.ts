@@ -1,7 +1,9 @@
+import chatroomRouter from "../modules/chatroom/chatroom.router";
+import bookCategoryRouter from "../modules/bookCategory/bookCategory.router";
 import { Router } from "express";
 import userRouter from "../modules/user/user.router";
 import authRouter from "../modules/auth/auth.router";
-import bookCategoryRouter from "../modules/bookCategory/bookCategory.router";
+
 import bookRouter from "../modules/book/book.router";
 import { OrderRouter } from "../modules/order/order.routes";
 import { CouponRouter } from "../modules/coupon/coupon.routes";
@@ -37,9 +39,10 @@ const moduleRoutes = [
     route: CartRouter,
   },
   {
-    path: "/order",
-    route: OrderRouter,
+    path: "/chatroom",
+    route: chatroomRouter,
   },
+  { path: "/order", route: OrderRouter },
   {
     path: "/coupon",
     route: CouponRouter,
@@ -47,7 +50,7 @@ const moduleRoutes = [
   {
     path: "/admin-dashboard",
     route: AdminDashboardRoutes,
-  }
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
