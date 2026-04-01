@@ -21,6 +21,7 @@ const buildCheckoutItems = async (userId: string, bookId?: string, quantity: num
   if (bookId) {
     const book = await Book.findById(bookId);
     if (!book) throw new AppError('Book not found', httpStatus.NOT_FOUND);
+    if (book.status !== 'active') throw new AppError('This book is currently unavailable for purchase', httpStatus.BAD_REQUEST);
     
     itemsToCheckout.push({
       book: new mongoose.Types.ObjectId(bookId),
@@ -36,10 +37,10 @@ const buildCheckoutItems = async (userId: string, bookId?: string, quantity: num
     }
     
     for (const item of cart.items) {
-      if (!item.book) {
-        throw new AppError('One or more items in your cart are no longer available', httpStatus.BAD_REQUEST);
-      }
       const bookData = item.book as any; // populated book
+      if (!bookData || bookData.status !== 'active') {
+        throw new AppError(`'${bookData?.title || 'One or more items'}' is no longer available`, httpStatus.BAD_REQUEST);
+      }
       itemsToCheckout.push({
         book: new mongoose.Types.ObjectId(String(bookData._id)),
         price: bookData.price,
@@ -118,24 +119,27 @@ const createCheckoutSession = async (
   });
 
   // 3. Stripe Session Initiation
-  const lineItems = itemsToCheckout.map((item) => {
+  const lineItems = await Promise.all(itemsToCheckout.map(async (item) => {
+    const book = await Book.findById(item.book);
     return {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: 'Book Purchase', // Could fetch exact title if needed
+          name: book?.title || 'Audiobook Purchase',
+          description: book?.author ? `By ${book.author}` : undefined,
         },
-        unit_amount: Math.round(item.price * 100), // Stripe expects cents
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
     };
-  });
+  }));
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: lineItems,
     discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : undefined,
     mode: 'payment',
+    expires_at: Math.floor(Date.now() / 1000) + (config.cron.orderExpiryMinutes * 60), // Match internal cleanup window
     success_url: `${config.clientUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.clientUrl}/payment/cancel`,
     client_reference_id: order._id.toString(),
@@ -194,10 +198,23 @@ const verifyPayment = async (userId: string, sessionId: string) => {
  * Shared finalization logic for both synchronous verification and async cron job
  */
 const finalizeOrder = async (order: any, session: Stripe.Checkout.Session) => {
-  // Update Order
-  order.paymentStatus = 'paid';
-  order.transactionId = session.payment_intent as string;
-  await order.save();
+  // 1. Atomic Idempotency Check
+  // We only proceed if the status is currently 'pending'. This prevents race conditions between Cron and Manual verify.
+  const updatedOrder = await Order.findOneAndUpdate(
+    { _id: order._id, paymentStatus: 'pending' },
+    { 
+      $set: { 
+        paymentStatus: 'paid',
+        transactionId: session.payment_intent as string
+      } 
+    },
+    { new: true }
+  );
+
+  if (!updatedOrder) {
+    // Order was already processed by another process (e.g., cron or concurrent request)
+    return;
+  }
 
   // 6. Handling the Ghost Cart (Data Integrity) explicitly without orderType switch
   const purchasedBookIds = new Set(order.items.map((item: any) => item.book.toString()));
