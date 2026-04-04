@@ -1,4 +1,5 @@
 import chatroomRouter from "../modules/chatroom/chatroom.router";
+import favoriteRouter from "../modules/favorite/favorite.router";
 import bookCategoryRouter from "../modules/bookCategory/bookCategory.router";
 import { Router } from "express";
 import userRouter from "../modules/user/user.router";
@@ -11,6 +12,7 @@ import { CartRouter } from "../modules/cart/cart.routes";
 import reviewRouter from "../modules/review/review.router";
 import { AdminDashboardRoutes } from "../modules/adminDashboard/adminDashboard.routes";
 import listenerProgressRouter from "../modules/listenerProgress/listenerProgress.router";
+import libraryRouter from "../modules/library/library.router";
 
 const router = Router();
 
@@ -55,6 +57,14 @@ const moduleRoutes = [
   {
     path: "/listener-progress",
     route: listenerProgressRouter,
+  },
+  {
+    path: "/library",
+    route: libraryRouter,
+  },
+  {
+    path: "/favorite",
+    route: favoriteRouter,
   },
 ];
 
