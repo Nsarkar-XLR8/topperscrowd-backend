@@ -5,13 +5,14 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import hpp from "hpp";
 
-// Global rate limiter
+// Global rate limiter - Added 'validate' to stop the proxy error
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
+  windowMs: 15 * 60 * 1000, 
   max: 150,
   standardHeaders: true,
   legacyHeaders: false,
   message: "Too many requests, try again later.",
+  validate: { xForwardedForHeader: false }, // <--- Fixes the error
 });
 
 // Login-specific rate limiter
@@ -21,14 +22,21 @@ export const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: "Too many login attempts, try again later.",
+  validate: { xForwardedForHeader: false }, // <--- Fixes the error
 });
 
-// CORS options
 const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:3001", "https://kathorianpublishingllc.com"],
+  // Added your production port 5001 to the whitelist
+  origin: [
+    "http://localhost:3000", 
+    "http://localhost:3001", 
+    "http://localhost:5001", 
+    "https://kathorianpublishingllc.com"
+  ],
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   credentials: true,
 };
+
 export const applySecurity = (app: Application) => {
   app.use(globalLimiter);
 
@@ -43,7 +51,6 @@ export const applySecurity = (app: Application) => {
 
   app.use(cors(corsOptions));
 
-  //! When you want to allow specific query parameters to be duplicated in the query string, you can use the whitelist option.
   app.use(
     hpp({
       whitelist: [],
@@ -51,6 +58,7 @@ export const applySecurity = (app: Application) => {
   );
   app.use(compression());
 
-  app.use(express.json({ limit: "10kb" }));
-  app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+  // FIXED: Increased limits to 50mb so your PATCH requests don't fail
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 };
