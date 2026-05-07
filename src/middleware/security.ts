@@ -31,7 +31,8 @@ const corsOptions = {
     "http://localhost:3000", 
     "http://localhost:3001", 
     "http://localhost:5001", 
-    "https://kathorianpublishingllc.com"
+    "https://kathorianpublishingllc.com",
+    "https://www.kathorianpublishingllc.com"
   ],
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   credentials: true,
