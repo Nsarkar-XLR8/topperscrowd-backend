@@ -45,4 +45,25 @@ router.get(
   CouponController.getMyCoupons
 );
 
+router.get(
+  '/all-coupons',
+  // #swagger.tags = ['Coupons']
+  // #swagger.summary = 'Get all coupons'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  /* #swagger.parameters['page'] = {
+        in: 'query',
+        description: 'Page number for pagination',
+        type: 'integer',
+        example: 1
+  } */
+  /* #swagger.parameters['limit'] = {
+        in: 'query',
+        description: 'Number of coupons per page',
+        type: 'integer',
+        example: 10
+  } */
+  auth(USER_ROLE.ADMIN),
+  CouponController.getAllCoupons
+);
+
 export const CouponRouter = router;

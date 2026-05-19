@@ -29,7 +29,22 @@ const getMyCoupons = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllCoupons = catchAsync(async (req: Request, res: Response) => {
+  const result = await CouponService.getAllCouponsFromDB(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All coupons retrieved successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+
+
 export const CouponController = {
   createCoupon,
   getMyCoupons,
+  getAllCoupons
 };

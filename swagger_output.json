@@ -1712,6 +1712,45 @@
         ]
       }
     },
+    "/api/v1/coupon/all-coupons": {
+      "get": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Get all coupons",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "example": 1,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of coupons per page",
+            "example": 10,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin-dashboard/recent-orders-stats": {
       "get": {
         "tags": [

@@ -4,6 +4,8 @@ import { User } from "../user/user.model";
 import { Coupon } from "./coupon.model";
 import sendEmail from "../../utils/sendEmail";
 
+import { paginationHelper } from "../../utils/pafinationHelper";
+
 const createCoupon = async (payload: {
   email: string;
   codeName: string;
@@ -87,7 +89,32 @@ const getMyCoupons = async (userId: string) => {
   return coupons;
 };
 
+const getAllCouponsFromDB = async (query: Record<string, any>) => {
+  const { page = 1, limit = 10 } = query;
+  const { skip, limit: perPage } = paginationHelper(page as string, limit as string);
+
+  const [data, total] = await Promise.all([
+    Coupon.find()
+      .populate("assignedTo", "firstName lastName email")
+      .skip(skip)
+      .limit(perPage)
+      .sort({ createdAt: -1 }),
+    Coupon.countDocuments(),
+  ]);
+
+  return {
+    data,
+    meta: {
+      total,
+      page: Number(page),
+      limit: perPage,
+      totalPage: Math.ceil(total / perPage),
+    },
+  };
+};
+
 export const CouponService = {
   createCoupon,
-  getMyCoupons
+  getMyCoupons,
+  getAllCouponsFromDB
 };
