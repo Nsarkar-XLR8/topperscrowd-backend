@@ -22,6 +22,23 @@ const createCouponSchema = z.object({
   })
 });
 
+const applyCouponSchema = z.object({
+  body: z.object({
+    couponCode: z.string({
+      required_error: "Coupon code is required",
+    }).min(1, { message: "Coupon code cannot be empty" }),
+    bookId: z.string().optional(),
+    quantity: z.number().int().min(1).optional(),
+    items: z.array(
+      z.object({
+        bookId: z.string(),
+        quantity: z.number().int().min(1).default(1),
+      })
+    ).optional(),
+  }),
+});
+
 export const CouponValidation = {
   createCouponSchema,
+  applyCouponSchema,
 };

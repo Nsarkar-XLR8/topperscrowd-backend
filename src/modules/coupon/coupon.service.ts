@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import { User } from "../user/user.model";
 import { Coupon } from "./coupon.model";
 import sendEmail from "../../utils/sendEmail";
+import { buildCheckoutItems, applyCouponDiscount } from "../order/order.service";
 
 import { paginationHelper } from "../../utils/pafinationHelper";
 
@@ -20,17 +21,23 @@ const createCoupon = async (payload: {
     throw new AppError("No user found with the provided email", httpStatus.NOT_FOUND);
   }
 
+  const codeNameUpper = payload.codeName.toUpperCase();
+
   // 2. Check for duplicate coupon code globally
-  const existingCoupon = await Coupon.findOne({ codeName: payload.codeName });
+  const existingCoupon = await Coupon.findOne({ codeName: codeNameUpper });
   if (existingCoupon) {
     throw new AppError("A coupon with this code already exists", httpStatus.BAD_REQUEST);
   }
 
-  // 3. Create the coupon assigned to the specific user
+  // 3. Set expiry date to the very end of the day in UTC (23:59:59.999)
+  const expiry = new Date(payload.expiryDate);
+  expiry.setUTCHours(23, 59, 59, 999);
+
+  // 4. Create the coupon assigned to the specific user
   const coupon = await Coupon.create({
-    codeName: payload.codeName,
+    codeName: codeNameUpper,
     assignedTo: user._id,
-    expiryDate: new Date(payload.expiryDate),
+    expiryDate: expiry,
     usesLimit: payload.usesLimit,
     discountType: payload.discountType,
     discountAmount: payload.discountAmount,
@@ -113,8 +120,34 @@ const getAllCouponsFromDB = async (query: Record<string, any>) => {
   };
 };
 
+const applyCouponAndCalculate = async (
+  userId: string,
+  payload: { couponCode: string; bookId?: string; quantity?: number; items?: { bookId: string; quantity: number }[] }
+) => {
+  const { couponCode, bookId, quantity = 1, items } = payload;
+
+  // 1. Snapshot Prices & Cart Integrity using exported buildCheckoutItems from OrderService
+  const { totalAmount } = await buildCheckoutItems(userId, bookId, quantity, items);
+
+  // 2. Validate and calculate discount using exported applyCouponDiscount from OrderService
+  const { appliedCouponId, finalTotal, discountAmount } = await applyCouponDiscount(userId, totalAmount, couponCode);
+
+  // 3. Fetch coupon details to return metadata
+  const coupon = await Coupon.findById(appliedCouponId);
+
+  return {
+    couponCode: coupon?.codeName || couponCode.toUpperCase(),
+    discountType: coupon?.discountType || 'flat',
+    discountValue: coupon?.discountAmount || 0,
+    originalTotal: totalAmount,
+    discountAmount,
+    finalTotal,
+  };
+};
+
 export const CouponService = {
   createCoupon,
   getMyCoupons,
-  getAllCouponsFromDB
+  getAllCouponsFromDB,
+  applyCouponAndCalculate
 };

@@ -41,10 +41,21 @@ const getAllCoupons = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const applyCoupon = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await CouponService.applyCouponAndCalculate(userId, req.body);
 
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Coupon applied and discount calculated successfully',
+    data: result,
+  });
+});
 
 export const CouponController = {
   createCoupon,
   getMyCoupons,
-  getAllCoupons
+  getAllCoupons,
+  applyCoupon
 };

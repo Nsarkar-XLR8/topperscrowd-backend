@@ -66,4 +66,40 @@ router.get(
   CouponController.getAllCoupons
 );
 
+router.post(
+  '/apply',
+  // #swagger.tags = ['Coupons']
+  // #swagger.summary = 'Apply a coupon code and calculate the discount'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  /* #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          required: ["couponCode"],
+          properties: {
+            couponCode: { type: "string", example: "SAVE20" },
+            bookId: { type: "string", example: "64f1a2b3c4d5e6f7a8b9c0d1" },
+            quantity: { type: "integer", example: 1 },
+            items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  bookId: { type: "string" },
+                  quantity: { type: "integer", example: 1 }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } */
+  auth(USER_ROLE.USER),
+  validateRequest(CouponValidation.applyCouponSchema),
+  CouponController.applyCoupon
+);
+
 export const CouponRouter = router;

@@ -31,7 +31,7 @@ const generateAccessToken = async () => {
   }
 };
 
-const buildCheckoutItems = async (userId: string, bookId?: string, quantity: number = 1, explicitItems?: { bookId: string; quantity: number }[]) => {
+export const buildCheckoutItems = async (userId: string, bookId?: string, quantity: number = 1, explicitItems?: { bookId: string; quantity: number }[]) => {
   const itemsToCheckout: { book: mongoose.Types.ObjectId; price: number; quantity: number }[] = [];
   let totalAmount = 0;
   const bookIdsToCheck: string[] = [];
@@ -83,13 +83,13 @@ const buildCheckoutItems = async (userId: string, bookId?: string, quantity: num
     }
   }
 
-  return { itemsToCheckout, totalAmount, bookIdsToCheck };
+  return { itemsToCheckout, totalAmount: Number(totalAmount.toFixed(2)), bookIdsToCheck };
 };
 
-const applyCouponDiscount = async (userId: string, totalAmount: number, couponCode?: string) => {
+export const applyCouponDiscount = async (userId: string, totalAmount: number, couponCode?: string) => {
   if (!couponCode) return { appliedCouponId: undefined, finalTotal: totalAmount, discountAmount: 0 };
 
-  const coupon = await Coupon.findOne({ codeName: couponCode, assignedTo: userId });
+  const coupon = await Coupon.findOne({ codeName: couponCode.toUpperCase(), assignedTo: userId });
   if (!coupon) {
     throw new AppError('Invalid coupon code', httpStatus.BAD_REQUEST);
   }
@@ -107,7 +107,11 @@ const applyCouponDiscount = async (userId: string, totalAmount: number, couponCo
     discountAmount = coupon.discountAmount;
   }
 
-  const finalTotal = Math.max(0, totalAmount - discountAmount);
+  // Cap discountAmount at the totalAmount, and round to 2 decimal places
+  discountAmount = Math.min(discountAmount, totalAmount);
+  discountAmount = Number(discountAmount.toFixed(2));
+
+  const finalTotal = Number((totalAmount - discountAmount).toFixed(2));
   return { appliedCouponId: coupon._id, finalTotal, discountAmount };
 };
 
