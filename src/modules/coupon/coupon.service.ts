@@ -145,9 +145,20 @@ const applyCouponAndCalculate = async (
   };
 };
 
+const deleteCouponFromDB = async (couponId: string) => {
+  const coupon = await Coupon.findById(couponId);
+  if (!coupon) {
+    throw new AppError("No coupon found with the provided ID", httpStatus.NOT_FOUND);
+  }
+
+  await Coupon.findByIdAndDelete(couponId);
+  return coupon;
+};
+
 export const CouponService = {
   createCoupon,
   getMyCoupons,
   getAllCouponsFromDB,
-  applyCouponAndCalculate
+  applyCouponAndCalculate,
+  deleteCouponFromDB
 };

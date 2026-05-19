@@ -1812,6 +1812,37 @@
         }
       }
     },
+    "/api/v1/coupon/{couponId}": {
+      "delete": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Delete a coupon by ID (Admin only)",
+        "description": "",
+        "parameters": [
+          {
+            "name": "couponId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the coupon to delete",
+            "example": "64f1a2b3c4d5e6f7a8b9c0d1"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin-dashboard/recent-orders-stats": {
       "get": {
         "tags": [

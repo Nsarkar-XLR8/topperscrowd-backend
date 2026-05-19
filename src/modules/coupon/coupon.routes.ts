@@ -102,4 +102,20 @@ router.post(
   CouponController.applyCoupon
 );
 
+router.delete(
+  '/:couponId',
+  // #swagger.tags = ['Coupons']
+  // #swagger.summary = 'Delete a coupon by ID (Admin only)'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  /* #swagger.parameters['couponId'] = {
+        in: 'path',
+        description: 'ID of the coupon to delete',
+        required: true,
+        type: 'string',
+        example: '64f1a2b3c4d5e6f7a8b9c0d1'
+  } */
+  auth(USER_ROLE.ADMIN),
+  CouponController.deleteCoupon
+);
+
 export const CouponRouter = router;
