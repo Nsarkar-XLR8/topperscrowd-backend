@@ -9,7 +9,8 @@ import { paginationHelper } from "../../utils/pafinationHelper";
  * Create a new Cover entry in the Database (with Cloudinary upload)
  */
 const createCoverIntoDB = async (req: any): Promise<ICover> => {
-  const payload = req.body;
+  const payload = { ...req.body };
+  delete payload.image;
   const file = req.file;
 
   if (!file) {
@@ -99,7 +100,8 @@ const updateCoverFromDb = async (
     throw new AppError("Cover entry not found", StatusCodes.NOT_FOUND);
   }
 
-  const payload = req.body;
+  const payload = { ...req.body };
+  delete payload.image;
   const file = req.file;
   const updateData: any = { ...payload };
 

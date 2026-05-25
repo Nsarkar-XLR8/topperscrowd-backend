@@ -13,14 +13,8 @@ const coverSchema = new Schema<ICover>(
       required: true 
     },
     image: {
-      public_id: { 
-        type: String, 
-        required: true 
-      },
-      url: { 
-        type: String, 
-        required: true 
-      },
+      public_id: String,
+      url: String,
     },
     edition: { 
       type: String, 
