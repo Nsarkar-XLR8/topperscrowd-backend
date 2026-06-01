@@ -35,6 +35,10 @@ async function main() {
     });
   } catch (error: any) {
     logger.error("Server failed to start:", error);
+    // ADD THESE TWO LINES TEMPORARILY:
+    console.error("=== RAW CRASH LOG START ===");
+    console.error(error);
+    throw error;
   }
 }
 
