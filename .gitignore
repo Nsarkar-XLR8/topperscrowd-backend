@@ -2,6 +2,10 @@ node_modules
 # script
 dist
 .env
+.qodo
+.idea
+.vscode
+
 
 
 branch_structure.json
