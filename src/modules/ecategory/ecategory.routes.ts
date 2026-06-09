@@ -11,17 +11,17 @@ const router = express.Router();
 router.get("/get-all", ecategoryController.getAllEcategories);
 
 router.post(
-  "/create-ecategory",
-  validateRequest(ecategoryValidation.createEcategoryValidationSchema),
-  auth(USER_ROLE.ADMIN),
-  ecategoryController.createEcategory
+    "/create-ecategory",
+    validateRequest(ecategoryValidation.createEcategoryValidationSchema),
+    auth(USER_ROLE.ADMIN),
+    ecategoryController.createEcategory
 );
 
 router.patch(
-  "/update/:EcatId",
-  validateRequest(ecategoryValidation.updateEcategoryValidationSchema),
-  auth(USER_ROLE.ADMIN),
-  ecategoryController.updateEcategory
+    "/update/:EcatId",
+    validateRequest(ecategoryValidation.updateEcategoryValidationSchema),
+    auth(USER_ROLE.ADMIN),
+    ecategoryController.updateEcategory
 );
 
 router.delete("/delete/:EcatId", auth(USER_ROLE.ADMIN), ecategoryController.deleteEcategory);

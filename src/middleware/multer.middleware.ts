@@ -16,13 +16,15 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     let filetypes: RegExp;
-    if (file.fieldname === "image") {
+    if (file.fieldname === "image" || file.fieldname === "coverImage") {
       filetypes = /jpeg|jpg|png|avif|webp/;
     } else if (file.fieldname === "audio") {
       filetypes = /mp3|wav|m4a|mpeg/;
+    } else if (file.fieldname === "file") {
+      filetypes = /pdf|epub/;
     } else {
       return cb(new Error("Unknown field name!"));
     }

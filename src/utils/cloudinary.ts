@@ -35,7 +35,7 @@ export const uploadToCloudinary = async (filePath: string, folder: string) => {
 // delete file
 export const deleteFromCloudinary = async (
   publicId: string,
-  resourceType: "image" | "video"
+  resourceType: "image" | "video" | "raw"
 ) => {
   try {
     await cloudinary.uploader.destroy(publicId, {
